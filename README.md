@@ -144,54 +144,38 @@ Power BI reports include:
 data-warehouse-etl-bi/
 │
 ├── README.md
-├── requirements.txt
-├── .gitignore
 │
 ├── data/
-│   ├── raw/                  # Original source files (never edit)
-│   ├── staging/              # Cleaned/intermediate outputs (optional)
-│   └── processed/            # Final processed datasets (optional)
-│
-├── sql/
-│   ├── 01_create_database.sql
-│   ├── 02_create_staging_tables.sql
-│   ├── 03_create_dimensions.sql
-│   ├── 04_create_fact_tables.sql
-│   ├── 05_indexes_partitions.sql
-│   └── 06_views_for_powerbi.sql
+│ └── raw/
+│ ├── 20100072.csv
+│ ├── 20100072_MetaData.csv
+│ └── warehouse.db # (Local test DB file - optional)
 │
 ├── etl/
-│   ├── config/
-│   │   └── db_config.env      # DB connection variables (DON'T push real secrets)
-│   │
-│   ├── extract.py             # Extract from CSV/SQL sources
-│   ├── transform.py           # Cleaning + transformations
-│   ├── load_staging.py        # Load into staging tables
-│   ├── load_warehouse.py      # Load into dim + fact tables
-│   ├── incremental_load.py    # CDC / timestamp-based incremental logic
-│   └── run_etl.py             # Main pipeline runner
+│ ├── extract.py # Extract data from source files
+│ ├── transform.py # Data cleaning + transformations
+│ ├── load_staging.py # Load cleaned data into staging tables
+│ ├── load_warehouse.py # Load data into fact + dimension tables
+│ ├── run_etl.py # Main pipeline runner (end-to-end)
+│ │
+│ └── pycache/ # Auto-generated (should be ignored in Git)
+│ ├── extract.cpython-313.pyc
+│ ├── transform.cpython-313.pyc
+│ ├── load_staging.cpython-313.pyc
+│ └── load_warehouse.cpython-313.pyc
 │
-├── notebooks/                 # Optional (EDA + testing)
-│   ├── data_profiling.ipynb
-│   └── etl_testing.ipynb
+├── sql/
+│ ├── 01_create_database.sql # Create database + schema setup
+│ ├── 02_create_staging_tables.sql # Create staging layer tables
+│ ├── 03_create_dimensions.sql # Create dimension tables
+│ ├── 04_create_fact_tables.sql # Create fact tables
+│ ├── 05_indexes_partitions.sql # Performance tuning scripts
+│ └── 06_views_for_powerbi.sql # Views for reporting / Power BI
 │
-├── dashboards/
-│   ├── powerbi_dashboard.pbix
-│   └── screenshots/
-│       ├── dashboard_page1.png
-│       └── dashboard_page2.png
+├── evaluation/
+│ ├── query_performance_results.csv # Query runtime benchmarking results
+│ └── verify_warehouse.py # Script to validate warehouse outputs
 │
-├── docs/
-│   ├── architecture_diagram.png
-│   ├── star_schema.png
-│   ├── project_report.pdf
-│   └── ppt/
-│       └── final_presentation.pptx
-│
-└── evaluation/
-    ├── etl_runtime_results.csv
-    ├── query_performance_results.csv
-    └── performance_summary.md
 
 ```
 
