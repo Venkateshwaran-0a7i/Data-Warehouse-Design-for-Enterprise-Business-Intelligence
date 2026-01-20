@@ -3,336 +3,620 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Warehouse Design & ETL Optimization</title>
+  <title>Data Warehouse Design & ETL Optimization | Project Portal</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     :root {
-      --bg: #0b1020;
-      --card: rgba(255, 255, 255, 0.06);
-      --card-border: rgba(255, 255, 255, 0.10);
-      --text: #eaf0ff;
-      --muted: rgba(234, 240, 255, 0.75);
-      --accent: #7c5cff;
-      --accent2: #22c55e;
-      --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
-      --radius: 18px;
+      --bg: #030712;
+      --card: rgba(17, 24, 39, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.5);
+      --accent2: #10b981;
+      --shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+      --radius: 20px;
+      --nav-bg: rgba(3, 7, 18, 0.8);
     }
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
-      background: radial-gradient(1200px 600px at 20% 10%, rgba(124, 92, 255, 0.25), transparent 60%),
-                  radial-gradient(1000px 500px at 90% 30%, rgba(34, 197, 94, 0.20), transparent 60%),
-                  var(--bg);
+      background-color: var(--bg);
       color: var(--text);
-      min-height: 100vh;
-      padding: 40px 18px;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.1), transparent 40%);
+    }
+
+    .glow-orb {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: var(--accent);
+      filter: blur(150px);
+      border-radius: 50%;
+      opacity: 0.1;
+      animation: float 20s infinite alternate ease-in-out;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(100px, 100px); }
     }
 
     .container {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
+      padding: 0 24px;
     }
 
-    header {
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px 0;
+    }
+
+    nav .container {
       display: flex;
-      flex-direction: column;
-      gap: 14px;
-      padding: 26px;
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      background: var(--card);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo i {
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding-top: 160px;
+      padding-bottom: 80px;
+      text-align: center;
+      position: relative;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      width: fit-content;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--card-border);
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--muted);
-      font-size: 14px;
+      gap: 8px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
-    .title {
-      font-size: clamp(22px, 3.2vw, 40px);
-      line-height: 1.15;
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
       font-weight: 800;
-      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #fff 0%, #9ca3af 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    .subtitle {
+    .hero-subtitle {
+      font-size: 1.125rem;
       color: var(--muted);
-      font-size: 16px;
-      line-height: 1.6;
-      max-width: 900px;
+      max-width: 700px;
+      margin: 0 auto 40px;
     }
 
-    .cta-row {
+    .hero-ctas {
       display: flex;
+      justify-content: center;
+      gap: 16px;
       flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 10px;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 10px;
-      padding: 11px 14px;
+      padding: 12px 28px;
       border-radius: 12px;
-      border: 1px solid var(--card-border);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
-      text-decoration: none;
       font-weight: 600;
-      transition: transform 0.15s ease, background 0.15s ease;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+      font-size: 0.95rem;
     }
 
-    .btn:hover {
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .btn-primary:hover {
       transform: translateY(-2px);
-      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 30px var(--accent-glow);
     }
 
-    .btn.primary {
-      background: linear-gradient(135deg, rgba(124, 92, 255, 0.85), rgba(124, 92, 255, 0.35));
-      border: 1px solid rgba(124, 92, 255, 0.55);
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text);
     }
 
-    .btn.primary:hover {
-      background: linear-gradient(135deg, rgba(124, 92, 255, 0.95), rgba(124, 92, 255, 0.45));
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
     }
 
-    .grid {
-      margin-top: 22px;
+    /* Section Styles */
+    section {
+      padding: 80px 0;
+    }
+
+    .section-header {
+      margin-bottom: 48px;
+    }
+
+    .section-header h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .section-header p {
+      color: var(--muted);
+      max-width: 600px;
+    }
+
+    /* Grid Layouts */
+    .feature-grid {
       display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
     }
 
     .card {
-      grid-column: span 6;
-      padding: 18px;
-      border-radius: var(--radius);
-      border: 1px solid var(--card-border);
       background: var(--card);
-      box-shadow: var(--shadow);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 32px;
       backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
     }
 
-    .card h2 {
-      font-size: 18px;
-      margin-bottom: 10px;
-      letter-spacing: -0.01em;
+    .card:hover {
+      border-color: rgba(99, 102, 241, 0.3);
+      transform: translateY(-4px);
+    }
+
+    .card i {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      margin-bottom: 16px;
     }
 
     .card p {
       color: var(--muted);
-      line-height: 1.65;
-      font-size: 15px;
+      font-size: 0.95rem;
     }
 
-    ul {
-      margin-top: 10px;
-      padding-left: 18px;
-      color: var(--muted);
-      line-height: 1.7;
-      font-size: 15px;
+    /* Architecture Section */
+    .arch-container {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
     }
 
-    .full {
-      grid-column: span 12;
+    .arch-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      position: relative;
     }
 
-    .tag-row {
+    .arch-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 48px;
+      width: 2px;
+      height: calc(100% - 16px);
+      background: linear-gradient(to bottom, var(--accent), transparent);
+    }
+
+    .step-number {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .step-content h4 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+    }
+
+    /* Deliverables Grid */
+    .deliverables-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .doc-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .doc-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--accent);
+    }
+
+    .doc-type {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .doc-card h4 {
+      margin-bottom: 20px;
+      font-size: 1rem;
+    }
+
+    .doc-card .btn {
+      width: 100%;
+      padding: 10px;
+      font-size: 0.85rem;
+    }
+
+    /* Tech Stack */
+    .tech-badges {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 12px;
+      gap: 12px;
+      margin-top: 24px;
     }
 
-    .tag {
-      font-size: 13px;
-      padding: 7px 10px;
-      border-radius: 999px;
+    .tech-badge {
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--card-border);
-      background: rgba(255, 255, 255, 0.04);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
       color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .flow {
-      margin-top: 12px;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px dashed rgba(234, 240, 255, 0.22);
-      background: rgba(255, 255, 255, 0.03);
-      overflow-x: auto;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 13px;
-      color: rgba(234, 240, 255, 0.85);
-      line-height: 1.6;
-      white-space: pre;
+    .tech-badge i {
+      color: var(--accent);
     }
 
-    .footer {
-      margin-top: 26px;
-      padding: 18px;
+    /* GitHub Section */
+    .github-banner {
+      background: linear-gradient(90deg, #111827 0%, #1e1b4b 100%);
       border-radius: var(--radius);
-      border: 1px solid var(--card-border);
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--muted);
+      padding: 60px;
       text-align: center;
-      font-size: 14px;
+      border: 1px solid var(--card-border);
     }
 
-    @media (max-width: 850px) {
-      .card { grid-column: span 12; }
+    .github-banner h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      margin-bottom: 24px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 60px 0;
+      border-top: 1px solid var(--card-border);
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      h1 { font-size: 3rem; }
+      .github-banner { padding: 40px 20px; }
     }
   </style>
 </head>
-
 <body>
-  <div class="container">
+  <div class="bg-animation">
+    <div class="glow-orb" style="top: 10%; left: 10%;"></div>
+    <div class="glow-orb" style="bottom: 20%; right: 10%; background: var(--accent2);"></div>
+  </div>
 
+  <nav>
+    <div class="container">
+      <a href="#" class="logo">
+        <i class="fas fa-database"></i> DWH Project
+      </a>
+      <div class="nav-links">
+        <a href="#overview">Overview</a>
+        <a href="#deliverables">Deliverables</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#github">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
     <!-- HERO -->
-    <header>
+    <header class="hero">
       <div class="badge">
-        <span style="color: var(--accent); font-weight: 800;">●</span>
-        Final Year Project • SQL Server + Python ETL + Power BI
+        <i class="fas fa-microchip"></i> Final Year Project
       </div>
-
-      <div class="title">
-        Data Warehouse Design and ETL Optimization<br />
-        for Enterprise Business Intelligence
-      </div>
-
-      <div class="subtitle">
-        A complete end-to-end enterprise analytics project that builds a Star Schema Data Warehouse in
-        <b>Microsoft SQL Server</b>, runs an optimized <b>Python ETL pipeline</b>, and generates KPI dashboards using <b>Power BI</b>.
-      </div>
-
-      <div class="cta-row">
-        <a class="btn primary" href="README.md" target="_blank">📄 View README</a>
-        <a class="btn" href="sql/01_create_database.sql" target="_blank">🗄️ SQL Scripts</a>
-        <a class="btn" href="etl/run_etl.py" target="_blank">⚙️ Run ETL</a>
-        <a class="btn" href="evaluation/query_performance_results.csv" target="_blank">📈 Results</a>
-      </div>
-
-      <div class="tag-row">
-        <span class="tag">Star Schema</span>
-        <span class="tag">Fact & Dimension Tables</span>
-        <span class="tag">Incremental Load</span>
-        <span class="tag">Index Optimization</span>
-        <span class="tag">BI Dashboards</span>
+      <h1>Data Warehouse Design <br>& ETL Optimization</h1>
+      <p class="hero-subtitle">
+        Building a high-performance Star Schema Data Warehouse in SQL Server with an automated Python ETL pipeline and interactive Power BI analytics.
+      </p>
+      <div class="hero-ctas">
+        <a href="#deliverables" class="btn btn-primary">
+          <i class="fas fa-file-pdf"></i> View Documents
+        </a>
+        <a href="https://github.com/Venkateshwaran-0a7i/Data-Warehouse-Design-for-Enterprise-Business-Intelligence" target="_blank" class="btn btn-secondary">
+          <i class="fab fa-github"></i> Explore Code
+        </a>
       </div>
     </header>
 
-    <!-- CONTENT GRID -->
-    <section class="grid">
-
-      <div class="card">
-        <h2>📌 Problem Statement</h2>
-        <p>
-          OLTP systems are built for transactions, not analytics. Running heavy reports directly on OLTP leads to
-          slow performance, inconsistent reporting, and limited historical insights.
-        </p>
+    <!-- OVERVIEW -->
+    <section id="overview">
+      <div class="section-header">
+        <h2>Project Overview</h2>
+        <p>A comprehensive approach to solving enterprise analytical challenges using modern data engineering practices.</p>
       </div>
-
-      <div class="card">
-        <h2>✅ Objectives</h2>
-        <ul>
-          <li>Build a centralized enterprise Data Warehouse (DWH)</li>
-          <li>Implement Python ETL (Extract → Transform → Load)</li>
-          <li>Design Star Schema (Fact + Dimensions)</li>
-          <li>Optimize ETL performance and query speed</li>
-          <li>Enable BI dashboards for KPI reporting</li>
-        </ul>
-      </div>
-
-      <div class="card full">
-        <h2>🏗️ Architecture Flow</h2>
-        <div class="flow">
-Operational Sources (CSV / SQL)
-        ↓
-Staging Tables (SQL Server)
-        ↓
-Python ETL (Extract → Transform → Load)
-        ↓
-Enterprise Data Warehouse (Star Schema)
-        ↓
-Power BI Dashboards (KPIs & Analytics)
+      <div class="feature-grid">
+        <div class="card">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h3>The Problem</h3>
+          <p>Traditional OLTP systems are not optimized for complex analysis. Direct reporting leads to performance bottlenecks, data inconsistency, and lack of historical context.</p>
+        </div>
+        <div class="card">
+          <i class="fas fa-bullseye"></i>
+          <h3>The Solution</h3>
+          <p>Implemented a centralized Data Warehouse with a robust Star Schema and an optimized ETL framework for efficient data processing and visualization.</p>
+        </div>
+        <div class="card">
+          <i class="fas fa-rocket"></i>
+          <h3>Optimization</h3>
+          <p>Utilized incremental loading, composite indexing, and query pre-aggregation to achieve up to 70% faster reporting performance.</p>
         </div>
       </div>
-
-      <div class="card">
-        <h2>🧩 Data Warehouse Model</h2>
-        <p><b>Fact Table:</b> FactSales</p>
-        <ul>
-          <li>Quantity</li>
-          <li>UnitPrice</li>
-          <li>TotalAmount</li>
-          <li>Profit (optional)</li>
-        </ul>
-        <p style="margin-top: 10px;"><b>Dimensions:</b> Customers, Products, Time, Region (optional)</p>
-      </div>
-
-      <div class="card">
-        <h2>⚡ Optimization Techniques</h2>
-        <ul>
-          <li>Incremental loading (timestamp/ID-based)</li>
-          <li>Indexing on fact table foreign keys</li>
-          <li>Pre-aggregation for KPI queries</li>
-          <li>Views for Power BI performance</li>
-        </ul>
-      </div>
-
-      <div class="card full">
-        <h2>📁 Repository Structure</h2>
-        <div class="flow">
-data-warehouse-etl-bi/
-├── data/raw/                  # dataset files
-├── etl/                       # python ETL scripts
-├── sql/                       # SQL Server schema + views
-└── evaluation/                # query performance results
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>🚀 How to Run</h2>
-        <ul>
-          <li>Run SQL scripts inside <b>sql/</b> in order</li>
-          <li>Execute the ETL pipeline:</li>
-        </ul>
-        <div class="flow">python etl/run_etl.py</div>
-      </div>
-
-      <div class="card">
-        <h2>🛠️ Tech Stack</h2>
-        <ul>
-          <li><b>Database:</b> Microsoft SQL Server</li>
-          <li><b>ETL:</b> Python (Pandas)</li>
-          <li><b>BI:</b> Power BI</li>
-          <li><b>Version Control:</b> GitHub</li>
-        </ul>
-      </div>
-
     </section>
 
-    <div class="footer">
-      <b>Author:</b> Venkateshwaran Mani • Final Year Project • Data Engineering / BI
-    </div>
+    <!-- DELIVERABLES -->
+    <section id="deliverables">
+      <div class="section-header">
+        <h2>Project Deliverables</h2>
+        <p>Access the core documentation including research papers, review presentations, and abstracts.</p>
+      </div>
+      <div class="deliverables-grid">
+        <div class="doc-card">
+          <span class="doc-type">Base Paper</span>
+          <h4>Secure On-Premises ETL Pipeline</h4>
+          <a href="BasePaper/A_Secure_On-Premises_ETL_Pipeline_for_Enterprise_Data_Warehousing_Integrating_OC.pdf" target="_blank" class="btn btn-secondary">
+            <i class="fas fa-external-link-alt"></i> View PDF
+          </a>
+        </div>
+        <div class="doc-card">
+          <span class="doc-type">Review 0</span>
+          <h4>Workflow & methodology</h4>
+          <a href="Reveiw 0/DATA WAREHOUSE DESIGN AND ETL OPTIMIZATION Workflow.pdf" target="_blank" class="btn btn-secondary">
+            <i class="fas fa-project-diagram"></i> View Workflow
+          </a>
+        </div>
+        <div class="doc-card">
+          <span class="doc-type">Review 1</span>
+          <h4>Project Progress PPT</h4>
+          <a href="Review 1/Reveiw 1.pptx" class="btn btn-secondary">
+            <i class="fas fa-file-powerpoint"></i> Download PPTX
+          </a>
+        </div>
+        <div class="doc-card">
+          <span class="doc-type">Abstract</span>
+          <h4>Summary & Results</h4>
+          <a href="Reveiw 0/Abstract.pdf" target="_blank" class="btn btn-secondary">
+            <i class="fas fa-align-left"></i> View Abstract
+          </a>
+        </div>
+      </div>
+    </section>
 
-  </div>
+    <!-- ARCHITECTURE -->
+    <section id="architecture">
+      <div class="section-header">
+        <h2>Architecture & Workflow</h2>
+        <p>Detailed technical breakdown of the data journey from source to dashboard.</p>
+      </div>
+      <div class="arch-container">
+        <div class="arch-step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Extraction Phase</h4>
+            <p>Gathering heterogeneous data from CSV files and SQL Server operational sources using specialized Python connectors.</p>
+          </div>
+        </div>
+        <div class="arch-step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Staging & Transformation</h4>
+            <p>Data cleansing, deduplication, and normalization in a dedicated staging layer. Applying business logic and referential integrity checks.</p>
+          </div>
+        </div>
+        <div class="arch-step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Warehouse Loading</h4>
+            <p>Loading dimensions first, followed by fact tables. Implementing incremental loads to minimize processing time for large datasets.</p>
+          </div>
+        </div>
+        <div class="arch-step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>BI Visualization</h4>
+            <p>Connecting Power BI to the optimized Star Schema to generate dynamic, real-time dashboards for KPI tracking.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TECH STACK -->
+    <section>
+      <div class="section-header">
+        <h2>Technology Stack</h2>
+        <p>The tools and frameworks powering this project.</p>
+      </div>
+      <div class="tech-badges">
+        <div class="tech-badge"><i class="fas fa-database"></i> SQL Server</div>
+        <div class="tech-badge"><i class="fab fa-python"></i> Python (Pandas)</div>
+        <div class="tech-badge"><i class="fas fa-chart-bar"></i> Power BI</div>
+        <div class="tech-badge"><i class="fab fa-git-alt"></i> Git / GitHub</div>
+        <div class="tech-badge"><i class="fas fa-table"></i> T-SQL</div>
+        <div class="tech-badge"><i class="fas fa-server"></i> On-Premise DWH</div>
+      </div>
+    </section>
+
+    <!-- GITHUB -->
+    <section id="github">
+      <div class="github-banner">
+        <h2>Ready to see the code?</h2>
+        <p style="color: var(--muted); margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto;">
+          Complete source code, SQL implementation scripts, and the Python ETL pipeline are available on the official GitHub repository.
+        </p>
+        <a href="https://github.com/Venkateshwaran-0a7i/Data-Warehouse-Design-for-Enterprise-Business-Intelligence" target="_blank" class="btn btn-primary" style="padding: 16px 40px;">
+          <i class="fab fa-github"></i> Repository Main Branch
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Venkateshwaran Mani | B.Tech Artificial Intelligence & Data Science</p>
+      <p style="margin-top: 8px; font-size: 0.8rem;">Data Engineering & BI Optimization Project</p>
+    </div>
+  </footer>
+
+  <script>
+    // Simple smooth scroll and active link highlight could be added here
+    window.addEventListener('scroll', () => {
+      let current = '';
+      const sections = document.querySelectorAll('section');
+      const navLinks = document.querySelectorAll('.nav-links a');
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (pageYOffset >= sectionTop - 100) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(a => {
+        a.classList.remove('active');
+        a.style.color = 'var(--muted)';
+        if (a.getAttribute('href').includes(current)) {
+          a.style.color = 'var(--accent)';
+        }
+      });
+    });
+  </script>
 </body>
 </html>
