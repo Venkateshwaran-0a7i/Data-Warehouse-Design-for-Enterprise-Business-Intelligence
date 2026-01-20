@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Warehouse Design & ETL Optimization</title>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: rgba(255, 255, 255, 0.06);
+      --card-border: rgba(255, 255, 255, 0.10);
+      --text: #eaf0ff;
+      --muted: rgba(234, 240, 255, 0.75);
+      --accent: #7c5cff;
+      --accent2: #22c55e;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      --radius: 18px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(1200px 600px at 20% 10%, rgba(124, 92, 255, 0.25), transparent 60%),
+                  radial-gradient(1000px 500px at 90% 30%, rgba(34, 197, 94, 0.20), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 18px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 26px;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .title {
+      font-size: clamp(22px, 3.2vw, 40px);
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 900px;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, rgba(124, 92, 255, 0.85), rgba(124, 92, 255, 0.35));
+      border: 1px solid rgba(124, 92, 255, 0.55);
+    }
+
+    .btn.primary:hover {
+      background: linear-gradient(135deg, rgba(124, 92, 255, 0.95), rgba(124, 92, 255, 0.45));
+    }
+
+    .grid {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      grid-column: span 6;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px solid var(--card-border);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .card p {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    ul {
+      margin-top: 10px;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .full {
+      grid-column: span 12;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      font-size: 13px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+    }
+
+    .flow {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px dashed rgba(234, 240, 255, 0.22);
+      background: rgba(255, 255, 255, 0.03);
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      color: rgba(234, 240, 255, 0.85);
+      line-height: 1.6;
+      white-space: pre;
+    }
+
+    .footer {
+      margin-top: 26px;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    @media (max-width: 850px) {
+      .card { grid-column: span 12; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- HERO -->
+    <header>
+      <div class="badge">
+        <span style="color: var(--accent); font-weight: 800;">●</span>
+        Final Year Project • SQL Server + Python ETL + Power BI
+      </div>
+
+      <div class="title">
+        Data Warehouse Design and ETL Optimization<br />
+        for Enterprise Business Intelligence
+      </div>
+
+      <div class="subtitle">
+        A complete end-to-end enterprise analytics project that builds a Star Schema Data Warehouse in
+        <b>Microsoft SQL Server</b>, runs an optimized <b>Python ETL pipeline</b>, and generates KPI dashboards using <b>Power BI</b>.
+      </div>
+
+      <div class="cta-row">
+        <a class="btn primary" href="README.md" target="_blank">📄 View README</a>
+        <a class="btn" href="sql/01_create_database.sql" target="_blank">🗄️ SQL Scripts</a>
+        <a class="btn" href="etl/run_etl.py" target="_blank">⚙️ Run ETL</a>
+        <a class="btn" href="evaluation/query_performance_results.csv" target="_blank">📈 Results</a>
+      </div>
+
+      <div class="tag-row">
+        <span class="tag">Star Schema</span>
+        <span class="tag">Fact & Dimension Tables</span>
+        <span class="tag">Incremental Load</span>
+        <span class="tag">Index Optimization</span>
+        <span class="tag">BI Dashboards</span>
+      </div>
+    </header>
+
+    <!-- CONTENT GRID -->
+    <section class="grid">
+
+      <div class="card">
+        <h2>📌 Problem Statement</h2>
+        <p>
+          OLTP systems are built for transactions, not analytics. Running heavy reports directly on OLTP leads to
+          slow performance, inconsistent reporting, and limited historical insights.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>✅ Objectives</h2>
+        <ul>
+          <li>Build a centralized enterprise Data Warehouse (DWH)</li>
+          <li>Implement Python ETL (Extract → Transform → Load)</li>
+          <li>Design Star Schema (Fact + Dimensions)</li>
+          <li>Optimize ETL performance and query speed</li>
+          <li>Enable BI dashboards for KPI reporting</li>
+        </ul>
+      </div>
+
+      <div class="card full">
+        <h2>🏗️ Architecture Flow</h2>
+        <div class="flow">
+Operational Sources (CSV / SQL)
+        ↓
+Staging Tables (SQL Server)
+        ↓
+Python ETL (Extract → Transform → Load)
+        ↓
+Enterprise Data Warehouse (Star Schema)
+        ↓
+Power BI Dashboards (KPIs & Analytics)
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🧩 Data Warehouse Model</h2>
+        <p><b>Fact Table:</b> FactSales</p>
+        <ul>
+          <li>Quantity</li>
+          <li>UnitPrice</li>
+          <li>TotalAmount</li>
+          <li>Profit (optional)</li>
+        </ul>
+        <p style="margin-top: 10px;"><b>Dimensions:</b> Customers, Products, Time, Region (optional)</p>
+      </div>
+
+      <div class="card">
+        <h2>⚡ Optimization Techniques</h2>
+        <ul>
+          <li>Incremental loading (timestamp/ID-based)</li>
+          <li>Indexing on fact table foreign keys</li>
+          <li>Pre-aggregation for KPI queries</li>
+          <li>Views for Power BI performance</li>
+        </ul>
+      </div>
+
+      <div class="card full">
+        <h2>📁 Repository Structure</h2>
+        <div class="flow">
+data-warehouse-etl-bi/
+├── data/raw/                  # dataset files
+├── etl/                       # python ETL scripts
+├── sql/                       # SQL Server schema + views
+└── evaluation/                # query performance results
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🚀 How to Run</h2>
+        <ul>
+          <li>Run SQL scripts inside <b>sql/</b> in order</li>
+          <li>Execute the ETL pipeline:</li>
+        </ul>
+        <div class="flow">python etl/run_etl.py</div>
+      </div>
+
+      <div class="card">
+        <h2>🛠️ Tech Stack</h2>
+        <ul>
+          <li><b>Database:</b> Microsoft SQL Server</li>
+          <li><b>ETL:</b> Python (Pandas)</li>
+          <li><b>BI:</b> Power BI</li>
+          <li><b>Version Control:</b> GitHub</li>
+        </ul>
+      </div>
+
+    </section>
+
+    <div class="footer">
+      <b>Author:</b> Venkateshwaran Mani • Final Year Project • Data Engineering / BI
+    </div>
+
+  </div>
+</body>
+</html>
