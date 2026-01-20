@@ -142,22 +142,58 @@ Results demonstrate:
 ## 📁 Project Structure
 
 ```
-├── data/
-│   ├── raw/
-│   ├── staging/
-│   └── processed/
-├── etl/
-│   ├── extract.py
-│   ├── transform.py
-│   └── load.py
-├── warehouse/
-│   ├── schema.sql
-│   └── indexes.sql
-├── dashboards/
-│   └── bi_reports.pbix
-├── evaluation/
-│   └── performance_metrics.md
+data-warehouse-etl-bi/
+│
 ├── README.md
+├── requirements.txt
+├── .gitignore
+│
+├── data/
+│   ├── raw/                  # Original source files (never edit)
+│   ├── staging/              # Cleaned/intermediate outputs (optional)
+│   └── processed/            # Final processed datasets (optional)
+│
+├── sql/
+│   ├── 01_create_database.sql
+│   ├── 02_create_staging_tables.sql
+│   ├── 03_create_dimensions.sql
+│   ├── 04_create_fact_tables.sql
+│   ├── 05_indexes_partitions.sql
+│   └── 06_views_for_powerbi.sql
+│
+├── etl/
+│   ├── config/
+│   │   └── db_config.env      # DB connection variables (DON'T push real secrets)
+│   │
+│   ├── extract.py             # Extract from CSV/SQL sources
+│   ├── transform.py           # Cleaning + transformations
+│   ├── load_staging.py        # Load into staging tables
+│   ├── load_warehouse.py      # Load into dim + fact tables
+│   ├── incremental_load.py    # CDC / timestamp-based incremental logic
+│   └── run_etl.py             # Main pipeline runner
+│
+├── notebooks/                 # Optional (EDA + testing)
+│   ├── data_profiling.ipynb
+│   └── etl_testing.ipynb
+│
+├── dashboards/
+│   ├── powerbi_dashboard.pbix
+│   └── screenshots/
+│       ├── dashboard_page1.png
+│       └── dashboard_page2.png
+│
+├── docs/
+│   ├── architecture_diagram.png
+│   ├── star_schema.png
+│   ├── project_report.pdf
+│   └── ppt/
+│       └── final_presentation.pptx
+│
+└── evaluation/
+    ├── etl_runtime_results.csv
+    ├── query_performance_results.csv
+    └── performance_summary.md
+
 ```
 
 ---
